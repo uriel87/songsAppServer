@@ -6,15 +6,16 @@
 
 var mongoose = require('mongoose');
 config = {
-	mongoUrl:'mongodb://newdbforreact:newdbforreact@ds217078.mlab.com:17078/newdbforreact'
+	mongoUrl:'mongodb://newdbforreact:newdbforreact1@ds217078.mlab.com:17078/newdbforreact'
 };
 
 //The server option auto_reconnect is defaulted to true
 var options = {
-	server: {
-		auto_reconnect:true,
-	}
+	useNewUrlParser: true,
+	useCreateIndex: true,
+	auto_reconnect:true
 };
+
 
 mongoose.connect(config.mongoUrl, options);
 db = mongoose.connection; // a global connection variable
@@ -43,10 +44,4 @@ db.on('reconnected', function () {
 });
 
 
-//require('../app/models/product');
-
-// require('../app/models/movie');
-
-// require('../app/models/user');
-
-// require('../app/models/review');
+require('../app/models/user');

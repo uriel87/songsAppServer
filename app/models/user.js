@@ -11,13 +11,7 @@ var userSchema = new schema( {
 
 	email: { type:String,  unique:true },
 	
-	picture: String,
-
-	birthday: String,
-
-	orders: [{
-	    movieId: {type: Number}
-	}]
+	tel: String,
 
 }, {collection: 'users'});
 
