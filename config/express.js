@@ -1,47 +1,22 @@
-var express = require('express'),
+const express = require('express'),
 	bodyParser = require('body-parser'),
 	graphqlHttp = require('express-graphql'),
-	{ buildSchema } = require('graphql');
+	graphQlSchema = require('../app/graphql/schema/index'),
+	graphQlResolvers = require('../app/graphql/resolvers/index')
+
+
 
 module.exports = function() {
 
 	var app = express();
 
+	const users = [];
+
 	app.use('/', express.static('./public'));
 
 	app.use('/graphql', bodyParser.json(),graphqlHttp({
-		schema: buildSchema(`
-
-		type Event {
-			_id: ID!
-			title: String!
-			description: String!
-			price: Float!
-			date: String!
-		}
-
-		type rootQuery {
-			events: [String!]!
-		}
-
-		type rootMutation {
-			createEvent(name: String): String
-		}
-
-		schema {
-			query: rootQuery
-			mutation: rootMutation
-		}
-		`),
-		rootValue: {
-			events: () => {
-				return ['a','b','c']
-			},
-			createEvent: (args) => {
-				const eventName = args.name;
-				return eventName;
-			}
-		},
+		schema: graphQlSchema,
+		rootValue: graphQlResolvers,
 		graphiql: true
 	}));
 

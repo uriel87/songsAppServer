@@ -45,3 +45,5 @@ db.on('reconnected', function () {
 
 
 require('../app/models/user');
+require('../app/models/song');
+

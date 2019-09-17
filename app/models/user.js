@@ -9,11 +9,20 @@ var userSchema = new schema( {
 
 	name: String,
 
+	password: String,
+
 	email: { type:String,  unique:true },
-	
+
 	tel: String,
+
+	songsList: [
+		{
+			type: schema.Types.ObjectId,
+			ref: 'Song'
+		}
+	]
 
 }, {collection: 'users'});
 
 // Define schema name
-mongoose.model('User',userSchema);
+module.exports = mongoose.model('User',userSchema);
