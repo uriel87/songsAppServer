@@ -24,7 +24,7 @@ type Song {
     name: String!
     singer: String!
     category: String!
-    userList: [User!]
+    userList: User!
 }
 
 input UserInput {

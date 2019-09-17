@@ -7,19 +7,14 @@ var mongoose = require("mongoose"),
 
 var bookingSchema = new schema( {
 
-    song: [
-		{
-			type: schema.Types.ObjectId,
-			ref: 'Song'
-		}
-	],
-    
-    user: [
-		{
+    song: {
+		type: schema.Types.ObjectId,
+		ref: 'Song'
+	},
+    user: {
 			type: schema.Types.ObjectId,
 			ref: 'User'
-		}
-	]
+	}
 }, {
     collection: 'booking',
     timestamps: true

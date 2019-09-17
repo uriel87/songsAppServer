@@ -5,37 +5,48 @@ Booking = require('../../models/booking'),
 bcrypt = require('bcryptjs');
 
 
-// const songs = async songIds => {
-//     try {
-//         const songs = await Song.find({ _id: { $in: songIds}})
-//         songs.map(event => {
-//             return {
-//                 ...song._doc,
-//                 _id: song.id,
-//                 userList: user.bind(this, song.songsList)
-//             }
-//         });
-//         return songs;
-//     } catch (err) {
-//         throw err;
-//     }
-// }
+const getSongsById = async songIds => {
+    try {
+        const songs = await Song.find({ _id: { $in: songIds}})
+        songs.map(event => {
+            return {
+                ...song._doc,
+                _id: song.id,
+                userList: user.bind(this, song.songsList)
+            }
+        });
+        return songs;
+    } catch (err) {
+        throw err;
+    }
+}
 
 
-// const user = userId => {
-//     try {
-//         const users = User.find(userId)
-//         return users.map(user => {
-//             return {
-//                 ...user._doc,
-//                 _id: user.id,
-//                 userList: user.bind(this, song.songsList)
-//             }
-//         });
-//     } catch (err) {
-//         throw err;
-//     }
-// }
+const getUser = async userId => {
+    try {
+        const user = await User.findById(userId)
+        return {
+            ...user._doc,
+            _id: user.id
+        };
+    } catch (err) {
+        throw err;
+    }
+}
+
+
+const getSong = async songIds => {
+    try {
+        const song = await Song.findById(songIds)
+        return {
+            ...song._doc,
+            _id: song.id,
+            name: song.name
+        }
+    } catch (err) {
+        throw err;
+    }
+}
 
 
 module.exports = {
@@ -44,7 +55,11 @@ module.exports = {
             console.log('in grapghQL query getAllUsers');
             const users = await User.find().populate('songsList')
             return users.map(user => {
-                return {...user._doc}
+                return {
+                    ...user._doc,
+                    _id: user._doc.id,
+                    createSong: getSong.bind(this, user._doc.songsList)
+                }
         })
         } catch (err) {
             console.log(err);
@@ -73,13 +88,17 @@ module.exports = {
             throw err
         }
     },
-    booking: async (args) => {
+    bookings: async () => {
         try {
-            const bookings = await Booking.find()
+            console.log("in booking query");
+            const bookings = await Booking.find();
+            console.log("all bookings results in booking query", bookings);
             return bookings.map(booking => {
                 return {
                     ...booking._doc,
-                    _id: booking_doc.id,
+                    _id: booking._doc._id,
+                    user: getUser.bind(this, booking._doc.user),
+                    song: getSong.bind(this, booking._doc.song),
                     createdAt: new Date(booking._doc.createdAt).toISOString(),
                     updatedAt: new Date(booking._doc.updatedAt).toISOString()
                  }
@@ -89,21 +108,20 @@ module.exports = {
             throw err;
         }
     },
-
     createSong: async (args) => {
         console.log("args in createSong", args)
         const song = new Song({
             name: args.songInput.name,
             singer: args.songInput.singer,
             category: args.songInput.category,
-            userList: ["5d7e64f4bd6e0716bc3f5df6"]
+            userList: "5d80ec21cbd09d2cec5af08c"
         });
     
         let createSong;
         try {
         const songResult = await song.save()
             createSong = { ...songResult._doc, _id: songResult._doc._id.toString()};
-            const user = await User.findById("5d7e64f4bd6e0716bc3f5df6")
+            const user = await User.findById("5d80ec21cbd09d2cec5af08c")
             if(!user){
                 throw new Error("user not found")
             }
@@ -117,18 +135,41 @@ module.exports = {
         }
     },
     bookEvent: async (args) => {
-        const fetchSong = await Song.findById({ _id: args._doc.id })
+        console.log("args in bookEvent",args );
+        const fetchSong = await Song.findById({ _id: args.songId })
         const booking = new Booking({
-            user: '5d7e64f4bd6e0716bc3f5df6',
+            user: '5d80ec21cbd09d2cec5af08c',
             song: fetchSong
         })
 
         const result = await booking.save();
+        console.log("result in bookEvent",booking );
+
         return {
-            ...booking,
-            _id: booking._doc.id,
+            ...result._doc,
+            _id: result._id,
+            user: getUser.bind(this, booking._doc.user),
+            song: getSong.bind(this, booking._doc.song),
             createdAt: new Date(result._doc.createdAt).toISOString(),
             updatedAt: new Date(result._doc.updatedAt).toISOString()
+        }
+    },
+    cancelBooking: async (args) => {
+        try {
+            const DeleteBooking = await Booking.findById(args.bookingId).populate('song');
+            
+            const song = {
+                ...DeleteBooking.song._doc,
+                _id: DeleteBooking.song.id,
+                songsList: getUser.bind(this, DeleteBooking.song._doc)
+            
+            }
+            
+            await Booking.deleteOne({ _id: args.bookingId })
+            return song
+        } catch (err) {
+            console.log("err in cancelBooking",DeleteBooking );
+            throw err;
         }
     } 
 }
