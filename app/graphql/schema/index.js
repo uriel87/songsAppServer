@@ -27,6 +27,12 @@ type Song {
     userList: User!
 }
 
+type AuthData {
+    userId: ID!,
+    token: String!
+    tokenEcpiration: Int!
+}
+
 input UserInput {
     name: String!
     password: String!
@@ -43,6 +49,7 @@ input SongInput {
 type rootQuery {
     users: [User!]!
     bookings: [Booking!]!
+    login(email: String!, password: String!): AuthData!
 }
 
 type rootMutation {
